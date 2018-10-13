@@ -33,6 +33,7 @@ class NeuralNet:
         # h1 and h2 represent the number of nodes in 1st and 2nd hidden layers
 
         raw_input = pd.read_csv(train)
+
         # TODO: Remember to implement the preprocess method
         train_dataset = self.preprocess(raw_input)
         ncols = len(train_dataset.columns)
@@ -64,9 +65,9 @@ class NeuralNet:
     def __activation(self, x, activation="sigmoid"):
         if activation == "sigmoid":
             self.__sigmoid(self, x)
-        elif activation=="tanh":
+        elif activation == "tanh":
             self.__tanh(self,x)
-        elif activation=="ReLu":
+        elif activation == "ReLu":
             self.__ReLu(self,x)
 
     def __activation_derivative(self, x, activation="sigmoid"):
@@ -99,6 +100,20 @@ class NeuralNet:
     #
 
     def preprocess(self, X):
+        print("preprocess")
+        X=X.dropna()
+        attributes_list=list(X)
+        print(attributes_list)
+        numeric_attributes=list(X._get_numeric_data())
+        print(numeric_attributes)
+        if 'Class' in numeric_attributes:
+            numeric_attributes.remove('Class')
+        non_numeric_attributes=list(set(attributes_list)-set(numeric_attributes))
+        for i in range(len(numeric_attributes)):
+            m=np.mean(X[numeric_attributes[i]])
+            sd=np.std(X[numeric_attributes[i]])
+            X[numeric_attributes[i]]=(X[numeric_attributes[i]]-m)/sd
+
 
         return X
 
@@ -141,37 +156,45 @@ class NeuralNet:
         self.compute_hidden_layer2_delta(activation)
         self.compute_hidden_layer1_delta(activation)
 
-    # TODO: Implement other activation functions
 
     def compute_output_delta(self, out, activation="sigmoid"):
         if activation == "sigmoid":
             delta_output = (self.y - out) * (self.__sigmoid_derivative(out))
-
+        elif activation == "tanh":
+            delta_output = (self.y - out) * (self.__tanh_derivative(out))
+        elif activation == "ReLu":
+            delta_output = (self.y - out) * (self.__ReLu_derivative(out))
         self.deltaOut = delta_output
 
-    # TODO: Implement other activation functions
 
     def compute_hidden_layer2_delta(self, activation="sigmoid"):
         if activation == "sigmoid":
             delta_hidden_layer2 = (self.deltaOut.dot(self.w23.T)) * (self.__sigmoid_derivative(self.X23))
-
+        elif activation == "tanh":
+            delta_hidden_layer2 = (self.deltaOut.dot(self.w23.T)) * (self.__tanh_derivative(self.X23))
+        elif activation == "ReLu":
+            delta_hidden_layer2 = (self.deltaOut.dot(self.w23.T)) * (self.__ReLu_derivative(self.X23))
         self.delta23 = delta_hidden_layer2
 
-    # TODO: Implement other activation functions
 
     def compute_hidden_layer1_delta(self, activation="sigmoid"):
         if activation == "sigmoid":
             delta_hidden_layer1 = (self.delta23.dot(self.w12.T)) * (self.__sigmoid_derivative(self.X12))
+        elif activation == "tanh":
+            delta_hidden_layer1 = (self.delta23.dot(self.w12.T)) * (self.__tanh_derivative(self.X12))
+        elif activation == "ReLu":
+            delta_hidden_layer1 = (self.delta23.dot(self.w12.T)) * (self.__ReLu_derivative(self.X12))
+        self.delta12 = delta_hidden_layer1
 
-            self.delta12 = delta_hidden_layer1
-
-    # TODO: Implement other activation functions
 
     def compute_input_layer_delta(self, activation="sigmoid"):
         if activation == "sigmoid":
             delta_input_layer = np.multiply(self.__sigmoid_derivative(self.X01), self.delta01.dot(self.w01.T))
-
-            self.delta01 = delta_input_layer
+        elif activation == "tanh":
+            delta_input_layer = np.multiply(self.__tanh_derivative(self.X01), self.delta01.dot(self.w01.T))
+        elif activation == "ReLu":
+            delta_input_layer = np.multiply(self.__ReLu_derivative(self.X01), self.delta01.dot(self.w01.T))
+        self.delta01 = delta_input_layer
 
     # TODO: Implement the predict function for applying the trained model on the  test dataset.
     # You can assume that the test dataset has the same format as the training dataset
