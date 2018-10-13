@@ -60,30 +60,39 @@ class NeuralNet:
         self.X23 = np.zeros((len(self.X), h2))
         self.delta23 = np.zeros((h2, output_layer_size))
         self.deltaOut = np.zeros((output_layer_size, 1))
-    #
-    # TODO: I have coded the sigmoid activation function, you need to do the same for tanh and ReLu
-    #
 
     def __activation(self, x, activation="sigmoid"):
         if activation == "sigmoid":
             self.__sigmoid(self, x)
-
-    #
-    # TODO: Define the function for tanh, ReLu and their derivatives
-    #
+        elif activation=="tanh":
+            self.__tanh(self,x)
+        elif activation=="ReLu":
+            self.__ReLu(self,x)
 
     def __activation_derivative(self, x, activation="sigmoid"):
         if activation == "sigmoid":
             self.__sigmoid_derivative(self, x)
-
+        elif activation == "tanh":
+            self.__tanh_derivative(self,x)
+        elif activation == "ReLu":
+            self.__ReLu_derivative(self,x)
     def __sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
-
-    # derivative of sigmoid function, indicates confidence about existing weight
+    def __tanh(self,x):
+        return (np.exp(x)-np.exp(-x))/(np.exp(x)+np.exp(-x))
+    def __ReLu(self,x):
+        return max(0,x)
 
     def __sigmoid_derivative(self, x):
         return x * (1 - x)
-
+    def __tanh_derivative(self,x):
+        y=self.__tanh(x)
+        return 1-y*y
+    def __ReLu_derivative(self,x):
+        if(x<=0):
+            return 0
+        else:
+            return 1
     #
     # TODO: Write code for pre-processing the dataset, which would include standardization, normalization,
     #   categorical to numerical, etc
