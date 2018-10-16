@@ -120,7 +120,7 @@ class NeuralNet:
             sd = np.std(X[numeric_attributes[i]])
             if sd != 0:
                 X[numeric_attributes[i]]=(X[numeric_attributes[i]]-m)/sd
-        print(X)
+
         return X
 
     # Below is the training function
