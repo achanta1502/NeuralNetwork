@@ -23,20 +23,21 @@
 
 import numpy as np
 import pandas as pd
+from sklearn import model_selection
 
 
 class NeuralNet:
-    def __init__(self, train, header = True, h1 = 4, h2 = 2):
+    def __init__(self, train, header = True, h1 = 6, h2 = 4):
         np.random.seed(1)
         # train refers to the training dataset
         # test refers to the testing dataset
         # h1 and h2 represent the number of nodes in 1st and 2nd hidden layers
 
-        raw_input = pd.read_csv(train)
-
+        # raw_input = pd.read_csv(train)
+        #
 
         pd.options.mode.chained_assignment = None
-        train_dataset = self.preprocess(raw_input)
+        train_dataset = self.preprocess(train)
         ncols = len(train_dataset.columns)
         nrows = len(train_dataset.index)
         self.X = train_dataset.iloc[:, 0:(ncols -1)].values.reshape(nrows, ncols-1)
@@ -106,6 +107,8 @@ class NeuralNet:
         X = X.dropna()
         attributes_list = list(X)
         numeric_attributes = list(X._get_numeric_data())
+        if 'Class' in numeric_attributes:
+            numeric_attributes.remove('Class')
 
         non_numeric_attributes = list(set(attributes_list)-set(numeric_attributes))
 
@@ -130,11 +133,11 @@ class NeuralNet:
         data[feature] = data[feature].map(featureMap)
         return data
 
-    def train(self, max_iterations = 1000, learning_rate = 0.05):
+    def train(self, max_iterations = 1500, learning_rate = 0.1):
         for iteration in range(max_iterations):
             out = self.forward_pass()
             error = 0.5 * np.power((out - self.y), 2)
-            self.backward_pass(out, activation="tanh")
+            self.backward_pass(out, activation="sigmoid")
             update_layer2 = learning_rate * self.X23.T.dot(self.deltaOut)
             update_layer1 = learning_rate * self.X12.T.dot(self.delta23)
             update_input = learning_rate * self.X01.T.dot(self.delta12)
@@ -212,8 +215,8 @@ class NeuralNet:
 
     def predict(self, test, header = True):
 
-        test_input = pd.read_csv(test)
-        test_dataset = self.preprocess(test_input)
+        # test_input = pd.read_csv(test)
+        test_dataset = self.preprocess(test)
 
         ncols = len(test_dataset.columns)
         nrows = len(test_dataset.index)
@@ -228,7 +231,9 @@ class NeuralNet:
 
 
 if __name__ == "__main__":
-    neural_network = NeuralNet("train.csv")
+    df=pd.DataFrame(pd.read_csv('Iris.csv'))
+    X_train, X_test = model_selection.train_test_split(df, test_size=0.25)
+    neural_network = NeuralNet(X_train)
     neural_network.train()
-    testError = neural_network.predict("test.csv")
+    testError = neural_network.predict(X_test)
 
