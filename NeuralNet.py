@@ -117,7 +117,7 @@ class NeuralNet:
             sd = np.std(X[numeric_attributes[i]])
             if sd != 0:
                 X[numeric_attributes[i]]=(X[numeric_attributes[i]]-m)/sd
-
+        print(X)
         return X
 
     # Below is the training function
@@ -142,8 +142,7 @@ class NeuralNet:
             self.w23 += update_layer2
             self.w12 += update_layer1
             self.w01 += update_input
-
-        print("After " + str(max_iterations) + " iterations, the total error is " + str(np.sum(error)))
+        print("After " + str(max_iterations) + " iterations, the total error is " + str(np.sum(error)/len(out)))
         print("The final weight vectors are (starting from input to output layers)")
         print(self.w01)
         print(self.w12)
@@ -215,25 +214,21 @@ class NeuralNet:
 
         test_input = pd.read_csv(test)
         test_dataset = self.preprocess(test_input)
+
         ncols = len(test_dataset.columns)
         nrows = len(test_dataset.index)
         self.X = test_dataset.iloc[:, 0:(ncols - 1)].values.reshape(nrows, ncols - 1)
         self.y = test_dataset.iloc[:, (ncols - 1)].values.reshape(nrows, 1)
 
-        in1 = np.dot(self.X, self.w01)
-        self.X12 = self.__sigmoid(in1)
-        in2 = np.dot(self.X12, self.w12)
-        self.X23 = self.__sigmoid(in2)
-        in3 = np.dot(self.X23, self.w23)
-        out = self.__sigmoid(in3)
-
+        out=self.forward_pass()
+        error = 0.5 * np.power((out - self.y), 2)
         print('Test error is :')
-        print(self.y - out)
-        return self.y - out
+        print(np.sum(error)/len(out))
+        return error
 
 
 if __name__ == "__main__":
-    neural_network = NeuralNet("train.csv")
+    neural_network = NeuralNet("Census+Income.csv")
     neural_network.train()
-    testError = neural_network.predict("test.csv")
+    testError = neural_network.predict("Census+Income.csv")
 
