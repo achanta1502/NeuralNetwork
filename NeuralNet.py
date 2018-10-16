@@ -103,26 +103,19 @@ class NeuralNet:
 
 
     def preprocess(self, X):
-        print("preprocess")
         X = X.dropna()
         attributes_list = list(X)
-        print(attributes_list)
         numeric_attributes = list(X._get_numeric_data())
 
-        print(numeric_attributes)
-
         non_numeric_attributes = list(set(attributes_list)-set(numeric_attributes))
-        print(non_numeric_attributes)
 
-        print(X)
         for i in non_numeric_attributes:
             X = NeuralNet.mapping(X, i)
 
-        print(X)
         for i in range(len(numeric_attributes)):
             m = np.mean(X[numeric_attributes[i]])
             sd = np.std(X[numeric_attributes[i]])
-            if(sd != 0):
+            if sd != 0:
                 X[numeric_attributes[i]]=(X[numeric_attributes[i]]-m)/sd
 
         return X
@@ -141,7 +134,7 @@ class NeuralNet:
         for iteration in range(max_iterations):
             out = self.forward_pass()
             error = 0.5 * np.power((out - self.y), 2)
-            self.backward_pass(out, activation="sigmoid")
+            self.backward_pass(out, activation="tanh")
             update_layer2 = learning_rate * self.X23.T.dot(self.deltaOut)
             update_layer1 = learning_rate * self.X12.T.dot(self.delta23)
             update_input = learning_rate * self.X01.T.dot(self.delta12)
@@ -219,9 +212,24 @@ class NeuralNet:
     # You have to output the test error from this function
 
     def predict(self, test, header = True):
-        neural_network.compute_output_delta(test)
-        print(neural_network.deltaOut)
-        return 0
+
+        test_input = pd.read_csv(test)
+        test_dataset = self.preprocess(test_input)
+        ncols = len(test_dataset.columns)
+        nrows = len(test_dataset.index)
+        self.X = test_dataset.iloc[:, 0:(ncols - 1)].values.reshape(nrows, ncols - 1)
+        self.y = test_dataset.iloc[:, (ncols - 1)].values.reshape(nrows, 1)
+
+        in1 = np.dot(self.X, self.w01)
+        self.X12 = self.__sigmoid(in1)
+        in2 = np.dot(self.X12, self.w12)
+        self.X23 = self.__sigmoid(in2)
+        in3 = np.dot(self.X23, self.w23)
+        out = self.__sigmoid(in3)
+
+        print('Test error is :')
+        print(self.y - out)
+        return self.y - out
 
 
 if __name__ == "__main__":
