@@ -228,7 +228,7 @@ class NeuralNet:
 
 
 if __name__ == "__main__":
-    neural_network = NeuralNet("Census+Income.csv")
+    neural_network = NeuralNet("train.csv")
     neural_network.train()
-    testError = neural_network.predict("Census+Income.csv")
+    testError = neural_network.predict("test.csv")
 
