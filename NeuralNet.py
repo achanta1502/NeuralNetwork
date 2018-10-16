@@ -84,10 +84,10 @@ class NeuralNet:
         return 1 / (1 + np.exp(-x))
 
     def __tanh(self, x):
-        return (np.exp(x)-np.exp(-x))/(np.exp(x)+np.exp(-x))
+        return np.tanh(x)
 
     def __ReLu(self, x):
-        return max(0, x)
+        return x*(x>0)
 
     def __sigmoid_derivative(self, x):
         return x * (1 - x)
@@ -97,10 +97,7 @@ class NeuralNet:
         return 1-y*y
 
     def __ReLu_derivative(self, x):
-        if(x<=0):
-            return 0
-        else:
-            return 1
+        return 1*(x>0)
 
 
     def preprocess(self, X):
@@ -135,9 +132,9 @@ class NeuralNet:
 
     def train(self, max_iterations = 1500, learning_rate = 0.1):
         for iteration in range(max_iterations):
-            out = self.forward_pass()
+            out = self.forward_pass("tanh")
             error = 0.5 * np.power((out - self.y), 2)
-            self.backward_pass(out, activation="sigmoid")
+            self.backward_pass(out, activation="tanh")
             update_layer2 = learning_rate * self.X23.T.dot(self.deltaOut)
             update_layer1 = learning_rate * self.X12.T.dot(self.delta23)
             update_input = learning_rate * self.X01.T.dot(self.delta12)
@@ -236,7 +233,7 @@ class NeuralNet:
         self.X = test_dataset.iloc[:, 0:(ncols - 1)].values.reshape(nrows, ncols - 1)
         self.y = test_dataset.iloc[:, (ncols - 1)].values.reshape(nrows, 1)
 
-        out=self.forward_pass()
+        out=self.forward_pass("tanh")
         error = 0.5 * np.power((out - self.y), 2)
         print('Test error is :')
         print(np.sum(error)/len(out))
